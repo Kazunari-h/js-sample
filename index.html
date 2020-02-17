@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>sample</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <h1>課題</h1>
+    <section></section>
+    <div class="container">
+        <h2>ダミーテキスト</h2>
+        <p>
+            あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、<br>
+            うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。<br>
+            またそのなかでいっしょになったたくさんのひとたち、<br>
+            ファゼーロとロザーロ、羊飼のミーロや、顔の赤いこどもたち、<br>
+            地主のテーモ、山猫博士のボーガント・デストゥパーゴなど、<br>
+            いまこの暗い巨きな石の建物のなかで考えていると、<br>
+            みんなむかし風のなつかしい青い幻燈のように思われます。<br>
+            では、わたくしはいつかの小さなみだしをつけながら、<br>
+            しずかにあの年のイーハトーヴォの五月から十月までを書きつけましょう。
+        </p>
+        <h2>ダミーテキスト</h2>
+        <p>
+            あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、<br>
+            うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。<br>
+            またそのなかでいっしょになったたくさんのひとたち、<br>
+            ファゼーロとロザーロ、羊飼のミーロや、顔の赤いこどもたち、<br>
+            地主のテーモ、山猫博士のボーガント・デストゥパーゴなど、<br>
+            いまこの暗い巨きな石の建物のなかで考えていると、<br>
+            みんなむかし風のなつかしい青い幻燈のように思われます。<br>
+            では、わたくしはいつかの小さなみだしをつけながら、<br>
+            しずかにあの年のイーハトーヴォの五月から十月までを書きつけましょう。
+        </p>
+    </div>
+    <script>
+        const section = document.querySelector( "section" )
+        window.addEventListener( "scroll", () => {
+            section.style.clipPath = `circle( ${ window.scrollY }px at center )`
+        } )
+
+        /*------------------------
+        canvas要素の取得と設定
+        -------------------------*/
+        //canvas要素の取得
+        const canvas = document.getElementById( 'canvas' ); //canvasを取得
+        const ctx = canvas.getContext( '2d' ); //canvasのコンテキストを取得
+
+        //canvasサイズの設定
+        var wd_width = window.innerWidth; //ウィンドウ幅をキャンバス幅に。
+        var wd_height = window.innerHeight; //ウィンドウ高をキャンバス高に。
+
+        ctx.canvas.width = wd_width;
+        ctx.canvas.height = wd_height;
+
+        /*------------------------------------------------
+        ループ処理「requestAnimFrame」のベンダープレフィクス
+        -------------------------------------------------*/
+        var animFrame = window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            window.oRequestAnimationFrame ||
+            window.msRequestAnimationFrame ||
+            function ( callback ) {
+                window.setTimeout( callback, 1000 / 60 );
+            };
+
+        /*------------------------
+        canvasサイズを可変にする
+        -------------------------*/
+        //リサイズイベントを拾って実行
+        window.addEventListener( 'resize', () => {
+            canvas.setAttribute( 'width', window.innerWidth );
+            canvas.setAttribute( 'height', window.innerHeight );
+        }, false );
+
+        canvas.setAttribute( 'width', window.innerWidth );
+        canvas.setAttribute( 'height', window.innerHeight );
+
+
+        /*------------------------
+        乱数
+        min から max までの乱整数を返す関数
+        Math.round() を用いると、非一様分布になります
+        -------------------------*/
+        function getRandomInt( min, max ) {
+            return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
+        }
+
+
+        /*------------------------
+        雪の設定
+        -------------------------*/
+        // 雪の粒を保存する配列
+        const snows = [];
+
+        // 雪の粒の初期位置とサイズの設定
+        function snow() {
+            this.position_x = getRandomInt( 0, wd_width );
+            this.position_y = getRandomInt( 0, wd_height );
+            this.snow_size = getRandomInt( 1, 4 );
+            this.speed = getRandomInt( 1, 3 ); //落下速度
+            this.wind = getRandomInt( 0, 0.5 );　 //横風の強さ
+        }
+
+        // 雪の粒の描画
+        snow.prototype.draw = function () {
+            var snow_grad = ctx.createRadialGradient(
+                this.position_x,
+                this.position_y,
+                this.snow_size * 0.6,
+                this.position_x,
+                this.position_y,
+                this.snow_size
+            );
+            /* グラデーション終点のオフセットと色をセット */
+            snow_grad.addColorStop( 0, 'rgba(225, 225, 225, 0.8)' );
+            snow_grad.addColorStop( 0.5, 'rgba(225, 225, 225, 0.2)' );
+            snow_grad.addColorStop( 1, 'rgba(225, 225, 225, 0.1)' );
+            ctx.beginPath();
+            ctx.fillStyle = snow_grad; // グラデーションをfillStyleプロパティにセット
+            ctx.arc( this.position_x, this.position_y, this.snow_size, 0, Math.PI * 2 );
+            ctx.fill();
+            ctx.closePath();
+        }
+        // 雪の粒の移動
+        snow.prototype.move = function () {
+            this.position_x += this.wind + Math.sin( this.position_y / 20 ) * 0.3;
+            this.position_y += this.speed;
+
+            if ( this.position_y > ctx.canvas.height ) {
+                this.position_y = 0;
+                this.position_x = getRandomInt( 0, wd_width );
+            }
+        }
+
+        // 雪の粒の密度(雪の量)
+        function snow_density( snow_count ) {
+            for ( var num = 0; num < snow_count; num++ ) {
+                snows[ num ] = new snow();
+            }
+        }
+        /*------------------------
+        雪を降らす処理
+        -------------------------*/
+        function snowy() {
+            ctx.clearRect( 0, 0, wd_width, wd_height );
+            for ( var num = 0; num < snows.length; num++ ) {
+                snows[ num ].draw();
+            }
+
+            for ( var num = 0; num < snows.length; num++ ) {
+                snows[ num ].move();
+            }
+
+            animFrame( snowy );
+        }
+
+        snow_density( 80 ); //雪の量の指定
+        snowy();
+
+    </script>
+</body>
+
+</html>
